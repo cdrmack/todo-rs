@@ -18,6 +18,11 @@ impl Entry {
 }
 
 fn main() {
-    let e = Entry::new(String::from("foo"));
-    println!("Entry = {:?}", e);
+    let mut todo_list = vec![];
+    todo_list.push(Entry::new(String::from("foo")));
+    todo_list.push(Entry::new(String::from("bar")));
+
+    for entry in todo_list {
+	println!("Entry = {:?}", entry);
+    }
 }
