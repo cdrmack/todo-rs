@@ -30,7 +30,7 @@ impl Entry {
 }
 
 const HELP_WIDTH: i32 = 40;
-const HELP_HEIGHT: i32 = 6;
+const HELP_HEIGHT: i32 = 5;
 
 fn main() {
     let root = initscr();
@@ -42,10 +42,12 @@ fn main() {
 
     let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
     box_(current_tasks, 0, 0);
+    let _ = mvwprintw(current_tasks, 0, 0, "CURRENT");
     wrefresh(current_tasks);
 
     let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, max_x / 2);
     box_(archived_tasks, 0, 0);
+    let _ = mvwprintw(archived_tasks, 0, 0, "ARCHIVED");
     wrefresh(archived_tasks);
 
     let help = newwin(
@@ -56,9 +58,12 @@ fn main() {
     );
 
     box_(help, 0, 0);
-    let _ = mvwprintw(help, 1, 1, "HOWTO:");
-    wrefresh(help);
+    let _ = mvwprintw(help, 0, 0, "HELP");
+    let _ = mvwprintw(help, 1, 1, "FOO");
+    let _ = mvwprintw(help, 2, 1, "BAR");
+    let _ = mvwprintw(help, 3, 1, "ASD");
 
+    wrefresh(help);
     wgetch(help);
 
     endwin();
