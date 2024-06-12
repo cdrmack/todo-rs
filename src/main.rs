@@ -40,19 +40,26 @@ fn main() {
 
     let _ = getmaxyx(root, &mut max_y, &mut max_x);
 
-    let w = newwin(
+    let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
+    box_(current_tasks, 0, 0);
+    wrefresh(current_tasks);
+
+    let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, max_x / 2);
+    box_(archived_tasks, 0, 0);
+    wrefresh(archived_tasks);
+
+    let help = newwin(
 	HELP_HEIGHT,
 	HELP_WIDTH,
 	max_y - HELP_HEIGHT,
 	(max_x / 2) - (HELP_WIDTH / 2),
     );
 
-    box_(w, 0, 0);
-    mvwprintw(w, 1, 1, "HOWTO:");
-    mvwprintw(w, 2, 1, "FOO");
-    mvwprintw(w, 3, 1, "FOO");
-    mvwprintw(w, 4, 1, "FOO");
-    wgetch(w);
+    box_(help, 0, 0);
+    let _ = mvwprintw(help, 1, 1, "HOWTO:");
+    wrefresh(help);
+
+    wgetch(help);
 
     endwin();
 }
