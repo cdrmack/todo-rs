@@ -36,6 +36,7 @@ impl Entry {
 struct Todo {
     pub current_tasks: Vec<Entry>,
     archived_tasks: Vec<Entry>,
+    pub cursor: usize,
 }
 
 impl Todo {
@@ -49,7 +50,7 @@ const HELP_HEIGHT: i32 = 5;
 
 fn main() {
     // tmp data
-    let mut todo = Todo{ current_tasks: vec![], archived_tasks: vec![] };
+    let mut todo = Todo{ current_tasks: vec![], archived_tasks: vec![], cursor: 0 };
     todo.add_task(Entry::new("first task".to_string()));
     todo.add_task(Entry::new("second task".to_string()));
     todo.add_task(Entry::new("third task".to_string()));
@@ -65,6 +66,11 @@ fn main() {
     box_(current_tasks, 0, 0);
     let _ = mvwprintw(current_tasks, 0, 0, "CURRENT");
     for (i, item) in todo.current_tasks.iter().enumerate() {
+	if (i == todo.cursor) {
+	    wattron(current_tasks, A_BOLD | A_UNDERLINE);
+	} else {
+	    wattroff(current_tasks, A_BOLD | A_UNDERLINE);
+	}
 	let _ = mvwprintw(current_tasks, i as i32 + 1, 1, item.get_description());
     }
     wrefresh(current_tasks);
@@ -85,7 +91,9 @@ fn main() {
     let _ = mvwprintw(help, 0, 0, "HELP");
     let _ = mvwprintw(help, 1, 1, "FOO");
     let _ = mvwprintw(help, 2, 1, "BAR");
-    let _ = mvwprintw(help, 3, 1, "ASD");
+
+    let _ = mvwaddstr(help, 3, 1, "ASD");
+
 
     wrefresh(help);
     wgetch(help);
