@@ -67,6 +67,7 @@ fn refresh_archived(archived: WINDOW, todo: &Todo) {
 
 fn main() {
     let root = initscr();
+    refresh();
 
     let mut max_x: i32 = 0;
     let mut max_y: i32 = 0;
@@ -81,7 +82,7 @@ fn main() {
     );
     box_(help, 0, 0);
     let _ = mvwprintw(help, 0, 0, "HELP");
-    let _ = mvwprintw(help, 1, 1, "FOO");
+    let _ = mvwprintw(help, 1, 1, "q - quit");
     let _ = mvwprintw(help, 2, 1, "BAR");
     let _ = mvwaddstr(help, 3, 1, "ASD");
     wrefresh(help);
@@ -104,11 +105,20 @@ fn main() {
     todo.add_task(Entry::new("second task".to_string()));
     todo.add_task(Entry::new("third task".to_string()));
 
+    //keypad(stdscr(), true);
+    //keypad(archived_tasks, true);
     loop {
 	// TODO: break condition
 	refresh_current(current_tasks, &todo);
 	refresh_archived(archived_tasks, &todo);
-	wgetch(help);
+	let ch = getch();
+	match ch {
+	    // 113 is for `q`
+	    113 => {
+		break;
+	    }
+	    _ => {},
+	}
     }
 
     endwin();
