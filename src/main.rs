@@ -27,12 +27,33 @@ impl Entry {
 	    self.state = new_state;
 	}
     }
+
+    fn get_description(&self) -> &str {
+	&self.description
+    }
+}
+
+struct Todo {
+    pub current_tasks: Vec<Entry>,
+    archived_tasks: Vec<Entry>,
+}
+
+impl Todo {
+    fn add_task(&mut self, new_entry: Entry) {
+	self.current_tasks.push(new_entry);
+    }
 }
 
 const HELP_WIDTH: i32 = 40;
 const HELP_HEIGHT: i32 = 5;
 
 fn main() {
+    // tmp data
+    let mut todo = Todo{ current_tasks: vec![], archived_tasks: vec![] };
+    todo.add_task(Entry::new("first task".to_string()));
+    todo.add_task(Entry::new("second task".to_string()));
+    todo.add_task(Entry::new("third task".to_string()));
+
     let root = initscr();
 
     let mut max_x: i32 = 0;
@@ -43,6 +64,9 @@ fn main() {
     let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
     box_(current_tasks, 0, 0);
     let _ = mvwprintw(current_tasks, 0, 0, "CURRENT");
+    for (i, item) in todo.current_tasks.iter().enumerate() {
+	let _ = mvwprintw(current_tasks, i as i32 + 1, 1, item.get_description());
+    }
     wrefresh(current_tasks);
 
     let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, max_x / 2);
