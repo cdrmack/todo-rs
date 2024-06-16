@@ -114,6 +114,8 @@ const HELP_HEIGHT: i32 = 5;
 fn main() {
     let root = initscr();
     keypad(initscr(), true);
+    noecho();
+    curs_set(CURSOR_VISIBILITY::CURSOR_INVISIBLE);
     refresh();
 
     let mut max_x: i32 = 0;
