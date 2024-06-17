@@ -41,10 +41,10 @@ enum Window {
 }
 
 struct Todo {
-    pub current_tasks: Vec<Entry>,
+    current_tasks: Vec<Entry>,
     archived_tasks: Vec<Entry>,
-    pub cursor: usize,
-    pub active_window: Window,
+    cursor: usize,
+    active_window: Window,
 }
 
 impl Todo {
@@ -74,17 +74,39 @@ impl Todo {
 	}
     }
 
+    fn mark_selected_as_done(&mut self) {
+	if self.active_window != Window::CurrentTasks || self.current_tasks.is_empty() {
+	    return;
+	}
+
+	let current_task = self.current_tasks.remove(self.cursor);
+	self.archived_tasks.push(current_task);
+
+	if self.current_tasks.is_empty() {
+	    // TODO: write text saying "EMPTY" or sth similar
+	    return;
+	}
+
+	if self.cursor > self.current_tasks.len() - 1 {
+	    self.cursor = self.current_tasks.len() - 1;
+	}
+    }
+
     fn cursor_change_window(&mut self) {
 	match self.active_window {
 	    Window::CurrentTasks => self.active_window = Window::ArchivedTasks,
 	    Window::ArchivedTasks => self.active_window = Window::CurrentTasks,
-	    _ => {},
+	    _ => {}
 	}
 	self.cursor = 0;
     }
 }
 
 fn refresh_current(current: WINDOW, todo: &Todo) {
+    wclear(current);
+    box_(current, 0, 0);
+    let _ = mvwprintw(current, 0, 0, "CURRENT");
+
     for (i, item) in todo.current_tasks.iter().enumerate() {
 	if todo.active_window == Window::CurrentTasks && i == todo.cursor {
 	    wattron(current, A_BOLD | A_UNDERLINE);
@@ -97,6 +119,10 @@ fn refresh_current(current: WINDOW, todo: &Todo) {
 }
 
 fn refresh_archived(archived: WINDOW, todo: &Todo) {
+    wclear(archived);
+    box_(archived, 0, 0);
+    let _ = mvwprintw(archived, 0, 0, "ARCHIVED");
+
     for (i, item) in todo.archived_tasks.iter().enumerate() {
 	if todo.active_window == Window::ArchivedTasks && i == todo.cursor {
 	    wattron(archived, A_BOLD | A_UNDERLINE);
@@ -108,7 +134,7 @@ fn refresh_archived(archived: WINDOW, todo: &Todo) {
     wrefresh(archived);
 }
 
-const HELP_WIDTH: i32 = 40;
+const HELP_WIDTH: i32 = 100;
 const HELP_HEIGHT: i32 = 5;
 
 fn main() {
@@ -131,18 +157,16 @@ fn main() {
     );
     box_(help, 0, 0);
     let _ = mvwprintw(help, 0, 0, "HELP");
+    // 1st column
     let _ = mvwprintw(help, 1, 1, "up/down - navigate");
     let _ = mvwprintw(help, 2, 1, "TAB - change window");
-    let _ = mvwaddstr(help, 3, 1, "q - quit");
+    let _ = mvwprintw(help, 3, 1, "q - quit");
+    // 2nd column
+    let _ = mvwprintw(help, 1, 40, "d - mark as done"); // TODO, calculate position
     wrefresh(help);
 
     let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
-    box_(current_tasks, 0, 0);
-    let _ = mvwprintw(current_tasks, 0, 0, "CURRENT");
-
     let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, max_x / 2);
-    box_(archived_tasks, 0, 0);
-    let _ = mvwprintw(archived_tasks, 0, 0, "ARCHIVED");
 
     // tmp data
     let mut tmp1 = Entry::new("fourth task".to_string());
@@ -166,8 +190,9 @@ fn main() {
 	match ch {
 	    KEY_UP => todo.cursor_up(),
 	    KEY_DOWN => todo.cursor_down(),
-	    9 => todo.cursor_change_window(), // 9 is for `TAB`
-	    113 => break, // 113 is for `q`
+	    9 => todo.cursor_change_window(),    // 9 is for `TAB`
+	    100 => todo.mark_selected_as_done(), // 100 is for `d`
+	    113 => break,                        // 113 is for `q`
 	    _ => {}
 	}
     }
