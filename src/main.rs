@@ -157,6 +157,20 @@ fn refresh_archived(archived: WINDOW, todo: &Todo) {
     wrefresh(archived);
 }
 
+fn refresh_help_window(help: WINDOW, dimensions: (i32, i32)) {
+    box_(help, 0, 0);
+
+    let _ = mvwprintw(help, 0, 0, "HELP");
+    // 1st column
+    let _ = mvwprintw(help, 1, 1, "up/down - navigate");
+    let _ = mvwprintw(help, 2, 1, "TAB - change window");
+    let _ = mvwprintw(help, 3, 1, "q - quit");
+    // 2nd column
+    let _ = mvwprintw(help, 1, dimensions.1 / 4 + 1, "d - mark as done");
+
+    wrefresh(help);
+}
+
 const HELP_HEIGHT: i32 = 5;
 
 fn main() {
@@ -172,16 +186,7 @@ fn main() {
     getmaxyx(root, &mut max_y, &mut max_x);
 
     let help = newwin(HELP_HEIGHT, max_x, max_y - HELP_HEIGHT, 0);
-    box_(help, 0, 0);
-
-    let _ = mvwprintw(help, 0, 0, "HELP");
-    // 1st column
-    let _ = mvwprintw(help, 1, 1, "up/down - navigate");
-    let _ = mvwprintw(help, 2, 1, "TAB - change window");
-    let _ = mvwprintw(help, 3, 1, "q - quit");
-    // 2nd column
-    let _ = mvwprintw(help, 1, max_x / 2 + 1, "d - mark as done");
-    wrefresh(help);
+    refresh_help_window(help, (max_y, max_x));
 
     let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
     let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2 + 1, 0, max_x / 2);
