@@ -46,6 +46,33 @@ struct Todo {
 }
 
 impl Todo {
+    fn new() -> Todo {
+	Todo {
+	    current_tasks: vec![],
+	    archived_tasks: vec![],
+	    cursor: 0,
+	    active_window: Window::CurrentTasks,
+	}
+    }
+
+    fn new_test() -> Todo {
+	let mut tmp1 = Entry::new("fourth task".to_string());
+	tmp1.change_state(EntryState::Done);
+	let mut tmp2 = Entry::new("fifth task".to_string());
+	tmp2.change_state(EntryState::Done);
+
+	Todo {
+	    current_tasks: vec![
+		Entry::new("first task".to_string()),
+		Entry::new("second task".to_string()),
+		Entry::new("third task".to_string()),
+	    ],
+	    archived_tasks: vec![tmp1, tmp2],
+	    cursor: 0,
+	    active_window: Window::CurrentTasks,
+	}
+    }
+
     fn add_task(&mut self, new_entry: Entry) {
 	self.current_tasks.push(new_entry);
     }
@@ -144,11 +171,7 @@ fn main() {
 
     getmaxyx(root, &mut max_y, &mut max_x);
 
-    let help = newwin(
-	HELP_HEIGHT,
-	max_x,
-	max_y - HELP_HEIGHT,
-	0);
+    let help = newwin(HELP_HEIGHT, max_x, max_y - HELP_HEIGHT, 0);
     box_(help, 0, 0);
 
     let _ = mvwprintw(help, 0, 0, "HELP");
@@ -163,20 +186,7 @@ fn main() {
     let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
     let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2 + 1, 0, max_x / 2);
 
-    // tmp data
-    let mut tmp1 = Entry::new("fourth task".to_string());
-    tmp1.change_state(EntryState::Done);
-    let mut tmp2 = Entry::new("fifth task".to_string());
-    tmp2.change_state(EntryState::Done);
-    let mut todo = Todo {
-	current_tasks: vec![],
-	archived_tasks: vec![tmp1, tmp2],
-	cursor: 0,
-	active_window: Window::CurrentTasks,
-    };
-    todo.add_task(Entry::new("first task".to_string()));
-    todo.add_task(Entry::new("second task".to_string()));
-    todo.add_task(Entry::new("third task".to_string()));
+    let mut todo = Todo::new_test();
 
     loop {
 	refresh_current(current_tasks, &todo);
