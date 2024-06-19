@@ -4,7 +4,6 @@ use ncurses::*;
 #[derive(Debug, PartialEq)]
 enum EntryState {
     Todo,
-    InProgress,
     Done,
 }
 
@@ -37,7 +36,6 @@ impl Entry {
 enum Window {
     CurrentTasks,
     ArchivedTasks,
-    Help,
 }
 
 struct Todo {
@@ -70,7 +68,6 @@ impl Todo {
 		    self.cursor += 1;
 		}
 	    }
-	    Window::Help => {}
 	}
     }
 
@@ -96,7 +93,6 @@ impl Todo {
 	match self.active_window {
 	    Window::CurrentTasks => self.active_window = Window::ArchivedTasks,
 	    Window::ArchivedTasks => self.active_window = Window::CurrentTasks,
-	    _ => {}
 	}
 	self.cursor = 0;
     }
@@ -105,7 +101,7 @@ impl Todo {
 fn refresh_current(current: WINDOW, todo: &Todo) {
     wclear(current);
     box_(current, 0, 0);
-    let _ = mvwprintw(current, 0, 0, "CURRENT");
+    let _ = mvwprintw(current, 0, 0, "TODO");
 
     for (i, item) in todo.current_tasks.iter().enumerate() {
 	if todo.active_window == Window::CurrentTasks && i == todo.cursor {
@@ -121,7 +117,7 @@ fn refresh_current(current: WINDOW, todo: &Todo) {
 fn refresh_archived(archived: WINDOW, todo: &Todo) {
     wclear(archived);
     box_(archived, 0, 0);
-    let _ = mvwprintw(archived, 0, 0, "ARCHIVED");
+    let _ = mvwprintw(archived, 0, 0, "DONE");
 
     for (i, item) in todo.archived_tasks.iter().enumerate() {
 	if todo.active_window == Window::ArchivedTasks && i == todo.cursor {
@@ -134,7 +130,6 @@ fn refresh_archived(archived: WINDOW, todo: &Todo) {
     wrefresh(archived);
 }
 
-const HELP_WIDTH: i32 = 100;
 const HELP_HEIGHT: i32 = 5;
 
 fn main() {
@@ -147,26 +142,26 @@ fn main() {
     let mut max_x: i32 = 0;
     let mut max_y: i32 = 0;
 
-    let _ = getmaxyx(root, &mut max_y, &mut max_x);
+    getmaxyx(root, &mut max_y, &mut max_x);
 
     let help = newwin(
 	HELP_HEIGHT,
-	HELP_WIDTH,
+	max_x,
 	max_y - HELP_HEIGHT,
-	(max_x / 2) - (HELP_WIDTH / 2),
-    );
+	0);
     box_(help, 0, 0);
+
     let _ = mvwprintw(help, 0, 0, "HELP");
     // 1st column
     let _ = mvwprintw(help, 1, 1, "up/down - navigate");
     let _ = mvwprintw(help, 2, 1, "TAB - change window");
     let _ = mvwprintw(help, 3, 1, "q - quit");
     // 2nd column
-    let _ = mvwprintw(help, 1, 40, "d - mark as done"); // TODO, calculate position
+    let _ = mvwprintw(help, 1, max_x / 2 + 1, "d - mark as done");
     wrefresh(help);
 
     let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
-    let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, max_x / 2);
+    let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2 + 1, 0, max_x / 2);
 
     // tmp data
     let mut tmp1 = Entry::new("fourth task".to_string());
