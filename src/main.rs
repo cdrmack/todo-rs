@@ -15,20 +15,20 @@ struct Entry {
 
 impl Entry {
     fn new(description: String) -> Self {
-	Entry {
-	    description,
-	    state: EntryState::Todo,
-	}
+        Entry {
+            description,
+            state: EntryState::Todo,
+        }
     }
 
     fn change_state(&mut self, new_state: EntryState) {
-	if self.state != new_state {
-	    self.state = new_state;
-	}
+        if self.state != new_state {
+            self.state = new_state;
+        }
     }
 
     fn get_description(&self) -> &str {
-	&self.description
+        &self.description
     }
 }
 
@@ -47,81 +47,81 @@ struct Todo {
 
 impl Todo {
     fn new() -> Todo {
-	Todo {
-	    current_tasks: vec![],
-	    archived_tasks: vec![],
-	    cursor: 0,
-	    active_window: Window::CurrentTasks,
-	}
+        Todo {
+            current_tasks: vec![],
+            archived_tasks: vec![],
+            cursor: 0,
+            active_window: Window::CurrentTasks,
+        }
     }
 
     fn new_test() -> Todo {
-	let mut tmp1 = Entry::new("fourth task".to_string());
-	tmp1.change_state(EntryState::Done);
-	let mut tmp2 = Entry::new("fifth task".to_string());
-	tmp2.change_state(EntryState::Done);
+        let mut tmp1 = Entry::new("fourth task".to_string());
+        tmp1.change_state(EntryState::Done);
+        let mut tmp2 = Entry::new("fifth task".to_string());
+        tmp2.change_state(EntryState::Done);
 
-	Todo {
-	    current_tasks: vec![
-		Entry::new("first task".to_string()),
-		Entry::new("second task".to_string()),
-		Entry::new("third task".to_string()),
-	    ],
-	    archived_tasks: vec![tmp1, tmp2],
-	    cursor: 0,
-	    active_window: Window::CurrentTasks,
-	}
+        Todo {
+            current_tasks: vec![
+                Entry::new("first task".to_string()),
+                Entry::new("second task".to_string()),
+                Entry::new("third task".to_string()),
+            ],
+            archived_tasks: vec![tmp1, tmp2],
+            cursor: 0,
+            active_window: Window::CurrentTasks,
+        }
     }
 
     fn add_task(&mut self, new_entry: Entry) {
-	self.current_tasks.push(new_entry);
+        self.current_tasks.push(new_entry);
     }
 
     fn cursor_up(&mut self) {
-	if self.cursor > 0 {
-	    self.cursor -= 1;
-	}
+        if self.cursor > 0 {
+            self.cursor -= 1;
+        }
     }
 
     fn cursor_down(&mut self) {
-	match self.active_window {
-	    Window::CurrentTasks => {
-		if self.cursor < self.current_tasks.len() - 1 {
-		    self.cursor += 1;
-		}
-	    }
-	    Window::ArchivedTasks => {
-		if self.cursor < self.archived_tasks.len() - 1 {
-		    self.cursor += 1;
-		}
-	    }
-	}
+        match self.active_window {
+            Window::CurrentTasks => {
+                if self.cursor < self.current_tasks.len() - 1 {
+                    self.cursor += 1;
+                }
+            }
+            Window::ArchivedTasks => {
+                if self.cursor < self.archived_tasks.len() - 1 {
+                    self.cursor += 1;
+                }
+            }
+        }
     }
 
     fn mark_selected_as_done(&mut self) {
-	if self.active_window != Window::CurrentTasks || self.current_tasks.is_empty() {
-	    return;
-	}
+        if self.active_window != Window::CurrentTasks || self.current_tasks.is_empty() {
+            return;
+        }
 
-	let current_task = self.current_tasks.remove(self.cursor);
-	self.archived_tasks.push(current_task);
+        let current_task = self.current_tasks.remove(self.cursor);
+        self.archived_tasks.push(current_task);
 
-	if self.current_tasks.is_empty() {
-	    // TODO: write text saying "EMPTY" or sth similar
-	    return;
-	}
+        if self.current_tasks.is_empty() {
+            // TODO: write text saying "EMPTY" or sth similar
+            return;
+        }
 
-	if self.cursor > self.current_tasks.len() - 1 {
-	    self.cursor = self.current_tasks.len() - 1;
-	}
+        if self.cursor > self.current_tasks.len() - 1 {
+            self.cursor = self.current_tasks.len() - 1;
+        }
     }
 
     fn cursor_change_window(&mut self) {
-	match self.active_window {
-	    Window::CurrentTasks => self.active_window = Window::ArchivedTasks,
-	    Window::ArchivedTasks => self.active_window = Window::CurrentTasks,
-	}
-	self.cursor = 0;
+        match self.active_window {
+            Window::CurrentTasks => self.active_window = Window::ArchivedTasks,
+            Window::ArchivedTasks => self.active_window = Window::CurrentTasks,
+        }
+        self.cursor = 0;
     }
 }
 
@@ -131,12 +131,12 @@ fn refresh_current(current: WINDOW, todo: &Todo) {
     let _ = mvwprintw(current, 0, 0, "TODO");
 
     for (i, item) in todo.current_tasks.iter().enumerate() {
-	if todo.active_window == Window::CurrentTasks && i == todo.cursor {
-	    wattron(current, A_BOLD | A_UNDERLINE);
-	} else {
-	    wattroff(current, A_BOLD | A_UNDERLINE);
-	}
-	let _ = mvwprintw(current, i as i32 + 1, 1, item.get_description());
+        if todo.active_window == Window::CurrentTasks && i == todo.cursor {
+            wattron(current, A_BOLD | A_UNDERLINE);
+        } else {
+            wattroff(current, A_BOLD | A_UNDERLINE);
+        }
+        let _ = mvwprintw(current, i as i32 + 1, 1, item.get_description());
     }
     wrefresh(current);
 }
@@ -147,12 +147,12 @@ fn refresh_archived(archived: WINDOW, todo: &Todo) {
     let _ = mvwprintw(archived, 0, 0, "DONE");
 
     for (i, item) in todo.archived_tasks.iter().enumerate() {
-	if todo.active_window == Window::ArchivedTasks && i == todo.cursor {
-	    wattron(archived, A_BOLD | A_UNDERLINE);
-	} else {
-	    wattroff(archived, A_BOLD | A_UNDERLINE);
-	}
-	let _ = mvwprintw(archived, i as i32 + 1, 1, item.get_description());
+        if todo.active_window == Window::ArchivedTasks && i == todo.cursor {
+            wattron(archived, A_BOLD | A_UNDERLINE);
+        } else {
+            wattroff(archived, A_BOLD | A_UNDERLINE);
+        }
+        let _ = mvwprintw(archived, i as i32 + 1, 1, item.get_description());
     }
     wrefresh(archived);
 }
@@ -194,17 +194,17 @@ fn main() {
     let mut todo = Todo::new_test();
 
     loop {
-	refresh_current(current_tasks, &todo);
-	refresh_archived(archived_tasks, &todo);
-	let ch = getch();
-	match ch {
-	    KEY_UP => todo.cursor_up(),
-	    KEY_DOWN => todo.cursor_down(),
-	    9 => todo.cursor_change_window(),    // 9 is for `TAB`
-	    100 => todo.mark_selected_as_done(), // 100 is for `d`
-	    113 => break,                        // 113 is for `q`
-	    _ => {}
-	}
+        refresh_current(current_tasks, &todo);
+        refresh_archived(archived_tasks, &todo);
+        let ch = getch();
+        match ch {
+            KEY_UP => todo.cursor_up(),
+            KEY_DOWN => todo.cursor_down(),
+            9 => todo.cursor_change_window(),    // 9 is for `TAB`
+            100 => todo.mark_selected_as_done(), // 100 is for `d`
+            113 => break,                        // 113 is for `q`
+            _ => {}
+        }
     }
 
     endwin();
