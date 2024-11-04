@@ -1,36 +1,8 @@
 extern crate ncurses;
 use ncurses::*;
+use entry::*;
 
-#[derive(Debug, PartialEq)]
-enum EntryState {
-    Todo,
-    Done,
-}
-
-#[derive(Debug)]
-struct Entry {
-    description: String,
-    state: EntryState,
-}
-
-impl Entry {
-    fn new(description: String) -> Self {
-        Entry {
-            description,
-            state: EntryState::Todo,
-        }
-    }
-
-    fn change_state(&mut self, new_state: EntryState) {
-        if self.state != new_state {
-            self.state = new_state;
-        }
-    }
-
-    fn get_description(&self) -> &str {
-        &self.description
-    }
-}
+mod entry;
 
 #[derive(PartialEq)]
 enum Window {
