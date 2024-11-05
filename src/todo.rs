@@ -79,6 +79,24 @@ impl Todo {
         }
     }
 
+    pub fn mark_selected_as_todo(&mut self) {
+        if self.active_window != Window::ArchivedTasks || self.archived_tasks.is_empty() {
+            return;
+        }
+
+        let archived_task = self.archived_tasks.remove(self.cursor);
+        self.current_tasks.push(archived_task);
+
+        if self.archived_tasks.is_empty() {
+            // TODO: write text saying "EMPTY" or sth similar
+            return;
+        }
+
+        if self.cursor > self.archived_tasks.len() -1 {
+            self.cursor = self.archived_tasks.len() - 1;
+        }
+    }
+
     pub fn cursor_change_window(&mut self) {
         match self.active_window {
             Window::CurrentTasks => self.active_window = Window::ArchivedTasks,

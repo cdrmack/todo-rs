@@ -44,7 +44,7 @@ fn refresh_archived(archived: WINDOW, todo: &Todo) {
     wrefresh(archived);
 }
 
-fn refresh_help_window(help: WINDOW, dimensions: (i32, i32)) {
+fn refresh_help(help: WINDOW, dimensions: (i32, i32)) {
     box_(help, 0, 0);
 
     let _ = mvwprintw(help, 0, 0, "HELP");
@@ -54,6 +54,7 @@ fn refresh_help_window(help: WINDOW, dimensions: (i32, i32)) {
     let _ = mvwprintw(help, 3, 1, "q - quit");
     // 2nd column
     let _ = mvwprintw(help, 1, dimensions.1 / 4 + 1, "d - mark as done");
+    let _ = mvwprintw(help, 2, dimensions.1 / 4 + 1, "t - mark as todo");
 
     wrefresh(help);
 }
@@ -73,7 +74,7 @@ fn main() {
     getmaxyx(root, &mut max_y, &mut max_x);
 
     let help = newwin(HELP_HEIGHT, max_x, max_y - HELP_HEIGHT, 0);
-    refresh_help_window(help, (max_y, max_x));
+    refresh_help(help, (max_y, max_x));
 
     let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
     let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2 + 1, 0, max_x / 2);
@@ -87,9 +88,10 @@ fn main() {
         match ch {
             KEY_UP => todo.cursor_up(),
             KEY_DOWN => todo.cursor_down(),
-            9 => todo.cursor_change_window(),    // 9 is for `TAB`
-            100 => todo.mark_selected_as_done(), // 100 is for `d`
-            113 => break,                        // 113 is for `q`
+            9 => todo.cursor_change_window(),     // 9 is for `TAB`
+            100 => todo.mark_selected_as_done(),  // 100 is for `d`
+            113 => break,                         // 113 is for `q`
+            116 => todo.mark_selected_as_todo() , // 116 is for `t`
             _ => {}
         }
     }
