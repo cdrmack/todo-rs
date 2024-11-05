@@ -1,4 +1,4 @@
-Minimalistic todo app using [[https://invisible-island.net/ncurses/announce.html][ncurses]].
+Minimalistic todo app using [[https://invisible-island.net/ncurses/][ncurses]].
 
 #+begin_src shell
   cargo run

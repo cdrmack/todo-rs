@@ -94,5 +94,7 @@ fn main() {
         }
     }
 
+    clear();
+    refresh();
     endwin();
 }
