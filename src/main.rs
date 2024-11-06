@@ -12,6 +12,22 @@ pub enum Window {
     ArchivedTasks,
 }
 
+fn refresh_help(help: WINDOW, dimensions: (i32, i32)) {
+    box_(help, 0, 0);
+
+    let _ = mvwprintw(help, 0, 0, "HELP");
+    // 1st column
+    let _ = mvwprintw(help, 1, 1, "up/down - navigate");
+    let _ = mvwprintw(help, 2, 1, "TAB - change window");
+    let _ = mvwprintw(help, 3, 1, "q - quit");
+    // 2nd column
+    let _ = mvwprintw(help, 1, dimensions.1 / 4 + 1, "a - add new task");
+    let _ = mvwprintw(help, 2, dimensions.1 / 4 + 1, "d - mark as done");
+    let _ = mvwprintw(help, 3, dimensions.1 / 4 + 1, "t - mark as todo");
+
+    wrefresh(help);
+}
+
 fn refresh_current(current: WINDOW, todo: &Todo) {
     wclear(current);
     box_(current, 0, 0);
@@ -44,19 +60,24 @@ fn refresh_archived(archived: WINDOW, todo: &Todo) {
     wrefresh(archived);
 }
 
-fn refresh_help(help: WINDOW, dimensions: (i32, i32)) {
-    box_(help, 0, 0);
+fn refresh_prompt(prompt: WINDOW) {
+    wclear(prompt);
+    box_(prompt, 0, 0);
+    let _ = mvwprintw(prompt, 0, 0, "NEW TASK");
+    wrefresh(prompt);
+}
 
-    let _ = mvwprintw(help, 0, 0, "HELP");
-    // 1st column
-    let _ = mvwprintw(help, 1, 1, "up/down - navigate");
-    let _ = mvwprintw(help, 2, 1, "TAB - change window");
-    let _ = mvwprintw(help, 3, 1, "q - quit");
-    // 2nd column
-    let _ = mvwprintw(help, 1, dimensions.1 / 4 + 1, "d - mark as done");
-    let _ = mvwprintw(help, 2, dimensions.1 / 4 + 1, "t - mark as todo");
+fn add_task_prompt(prompt: WINDOW, todo: &mut Todo) {
+    echo();
+    refresh_prompt(prompt);
 
-    wrefresh(help);
+    let mut description = String::new();
+    mvwgetnstr(prompt, 1, 1, &mut description, 20);
+
+    if !description.is_empty() {
+        todo.add_task(entry::Entry::new(description.to_string()));
+    }
+    noecho();
 }
 
 const HELP_HEIGHT: i32 = 5;
@@ -77,7 +98,11 @@ fn main() {
     refresh_help(help, (max_y, max_x));
 
     let current_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2, 0, 0);
-    let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2 + 1, 0, max_x / 2);
+    let archived_tasks = newwin(max_y - HELP_HEIGHT, max_x / 2 + 1, 0, max_x / 2 - 1);
+
+    let prompt_width = max_x / 2;
+    let prompt_height = max_y / 10;
+    let prompt = newwin(prompt_height, prompt_width, max_y / 2 - prompt_height / 2, max_x / 2 - prompt_width / 2);
 
     let mut todo = Todo::new_test();
 
@@ -88,10 +113,15 @@ fn main() {
         match ch {
             KEY_UP => todo.cursor_up(),
             KEY_DOWN => todo.cursor_down(),
-            9 => todo.cursor_change_window(),     // 9 is for `TAB`
-            100 => todo.mark_selected_as_done(),  // 100 is for `d`
-            113 => break,                         // 113 is for `q`
-            116 => todo.mark_selected_as_todo() , // 116 is for `t`
+            9 => todo.cursor_change_window(),     // `TAB`
+            97 => {                               // `a`
+                echo();
+                add_task_prompt(prompt, &mut todo);
+                noecho();
+            }
+            100 => todo.mark_selected_as_done(),  // `d`
+            113 => break,                         // `q`
+            116 => todo.mark_selected_as_todo() , // `t`
             _ => {}
         }
     }
